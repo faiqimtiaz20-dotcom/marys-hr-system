@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { UserRole } from "@/types/auth";
 import { getStoredMockRole, setStoredMockRole } from "@/lib/mock-session";
 
@@ -12,7 +12,11 @@ type MockAuthContextValue = {
 const MockAuthContext = createContext<MockAuthContextValue | null>(null);
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<UserRole>(() => getStoredMockRole());
+  const [role, setRoleState] = useState<UserRole>("owner_admin");
+
+  useEffect(() => {
+    setRoleState(getStoredMockRole());
+  }, []);
 
   const setRole = useCallback((next: UserRole) => {
     setStoredMockRole(next);

@@ -11,13 +11,27 @@ export const roleOptions: Array<{ value: UserRole; label: string; note: string }
 export const mockUsers: AuthUser[] = [
   {
     id: "usr_001",
-    fullName: "Mary Johnson",
-    email: "mary@maryshr.com",
+    fullName: "Admin User",
+    email: "admin@maryshr.com",
     companyName: "Marys HR Online Services",
     role: "owner_admin",
   },
   {
     id: "usr_002",
+    fullName: "Fatima Khan",
+    email: "hr.manager@maryshr.com",
+    companyName: "Marys HR Online Services",
+    role: "hr_manager",
+  },
+  {
+    id: "usr_003",
+    fullName: "Ali Hassan",
+    email: "interviewer@maryshr.com",
+    companyName: "Marys HR Online Services",
+    role: "interviewer",
+  },
+  {
+    id: "usr_004",
     fullName: "Ahmad Rehman",
     email: "ahmad.recruiter@maryshr.com",
     companyName: "Marys HR Online Services",

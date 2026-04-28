@@ -49,6 +49,10 @@ type SidebarProps = {
 export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { role } = useMockAuth();
+  const roleLabel = role
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 
   const visibleItems = navItems.filter((item) => canAccessPath(role, item.href));
 
@@ -62,7 +66,12 @@ export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
     >
       <div className="mb-6 flex h-12 items-center rounded-xl bg-white/5 px-3 text-sm font-semibold tracking-wide">
         <span className={cn(collapsed && "mx-auto")}>MHR</span>
-        {!collapsed && <span className="ml-2 text-sidebar-muted">Recruiting OS</span>}
+        {!collapsed && (
+          <div className="ml-2 min-w-0">
+            <p className="truncate text-sidebar-muted">Recruiting OS</p>
+            <p className="truncate text-[10px] font-medium uppercase tracking-wider text-sidebar-muted/80">{roleLabel}</p>
+          </div>
+        )}
       </div>
       <nav
         className="min-h-0 flex-1 space-y-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"

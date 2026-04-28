@@ -1,10 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { ChevronDown, PanelLeft, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { NotificationCenter } from "@/components/layout/notification-center";
-import { MockRoleSwitcher } from "@/components/layout/mock-role-switcher";
+import { MOCK_ROLE_STORAGE_KEY } from "@/lib/mock-session";
+import { useMockAuth } from "@/contexts/mock-auth-context";
+import { mockUsers } from "@/mocks/auth";
 
 type TopbarProps = {
   onToggleSidebar: () => void;
@@ -14,6 +17,8 @@ type TopbarProps = {
 };
 
 export function Topbar({ onToggleSidebar, sidebarCollapsed, isLargeLayout, mobileNavOpen }: TopbarProps) {
+  const router = useRouter();
+  const { role } = useMockAuth();
   const menuAriaLabel = !isLargeLayout
     ? mobileNavOpen
       ? "Close navigation menu"
@@ -23,6 +28,14 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed, isLargeLayout, mobil
       : "Collapse sidebar";
 
   const menuAriaExpanded = !isLargeLayout ? mobileNavOpen : undefined;
+  const currentUserName = mockUsers.find((user) => user.role === role)?.fullName ?? "User";
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(MOCK_ROLE_STORAGE_KEY);
+    }
+    router.push("/login");
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
@@ -57,17 +70,26 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed, isLargeLayout, mobil
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <MockRoleSwitcher />
             <NotificationCenter />
             <ThemeToggle />
-            <button
-              type="button"
-              className="inline-flex h-10 max-w-[9rem] items-center gap-1.5 truncate rounded-xl border bg-surface px-2 text-sm transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-none sm:gap-2 sm:px-3"
-              aria-label="Organization switcher"
-            >
-              <span className="truncate">Marys HR</span>
-              <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
-            </button>
+            <details className="relative">
+              <summary
+                className="inline-flex h-10 max-w-[9rem] cursor-pointer list-none items-center gap-1.5 truncate rounded-xl border bg-surface px-2 text-sm transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-none sm:gap-2 sm:px-3"
+                aria-label="Organization switcher"
+              >
+                <span className="truncate">{currentUserName}</span>
+                <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
+              </summary>
+              <div className="absolute right-0 z-40 mt-2 w-40 rounded-xl border bg-surface p-1 shadow-lg">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex h-9 w-full items-center rounded-lg px-3 text-left text-sm text-rose-600 transition hover:bg-surface-muted dark:text-rose-400"
+                >
+                  Logout
+                </button>
+              </div>
+            </details>
           </div>
         </div>
       </div>

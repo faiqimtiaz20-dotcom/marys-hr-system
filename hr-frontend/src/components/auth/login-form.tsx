@@ -6,12 +6,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Shield } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { postLoginRedirectPath } from "@/config/routes";
 import { loginWithEmail } from "@/services/auth-service";
 import { FormInput } from "@/components/shared/form-controls";
 import { FormStatus } from "@/components/shared/form-status";
 import { SsoButtons } from "@/components/auth/sso-buttons";
+import { mockUsers } from "@/mocks/auth";
+import { setStoredMockRole } from "@/lib/mock-session";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address."),
@@ -27,12 +29,13 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: "mary@maryshr.com",
-      password: "",
+      email: "admin@maryshr.com",
+      password: "Password@123",
       rememberMe: false,
     },
   });
@@ -41,10 +44,20 @@ export function LoginForm() {
     setResult(null);
     const response = await loginWithEmail(values.email, values.password);
     if (response.success) {
+      const matchedUser = mockUsers.find((user) => user.email.toLowerCase() === values.email.toLowerCase());
+      if (matchedUser) {
+        setStoredMockRole(matchedUser.role);
+      }
       router.push(postLoginRedirectPath);
       return;
     }
     setResult({ type: "error", message: response.message });
+  };
+
+  const applyDemoCredential = (email: string) => {
+    setResult(null);
+    setValue("email", email, { shouldValidate: true, shouldDirty: true });
+    setValue("password", "Password@123", { shouldValidate: true, shouldDirty: true });
   };
 
   return (
@@ -78,6 +91,34 @@ export function LoginForm() {
         />
       </div>
 
+      <div className="rounded-xl border bg-surface p-3 text-sm text-zinc-600 dark:text-zinc-300">
+        <p className="font-semibold text-foreground">Demo credentials</p>
+        <div className="mt-2 space-y-1">
+          <button
+            type="button"
+            onClick={() => applyDemoCredential("admin@maryshr.com")}
+            className="block text-left text-sm transition hover:text-foreground hover:underline"
+          >
+            Admin: admin@maryshr.com
+          </button>
+          <button
+            type="button"
+            onClick={() => applyDemoCredential("hr.manager@maryshr.com")}
+            className="block text-left text-sm transition hover:text-foreground hover:underline"
+          >
+            HR Manager: hr.manager@maryshr.com
+          </button>
+          <button
+            type="button"
+            onClick={() => applyDemoCredential("interviewer@maryshr.com")}
+            className="block text-left text-sm transition hover:text-foreground hover:underline"
+          >
+            Interviewer: interviewer@maryshr.com
+          </button>
+        </div>
+        <p className="mt-2 text-sm">Password: Password@123</p>
+      </div>
+
       <div className="flex items-center justify-between gap-3">
         <label className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-600 dark:text-zinc-400">
           <input
@@ -105,14 +146,6 @@ export function LoginForm() {
           "Sign in to workspace"
         )}
       </button>
-
-      <p className="flex items-start justify-center gap-2 text-center text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-        <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/80" aria-hidden />
-        <span>
-          Sessions use encrypted transport (TLS). This build uses mock authentication — use any password with 8+
-          characters for a demo account email.
-        </span>
-      </p>
 
       <div className="flex items-center justify-between gap-3 border-t border-border pt-5 text-sm">
         <Link
